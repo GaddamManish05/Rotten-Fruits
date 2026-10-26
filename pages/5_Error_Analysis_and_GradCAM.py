@@ -138,10 +138,10 @@ else:
     # Confidence Calibration vs Accuracy
     st.markdown("---")
     st.markdown("### 3. Confidence Calibration vs Ground-Truth Correctness")
-    st.markdown("""
+    st.markdown(r"""
     A fundamental limitation of modern Deep Neural Networks with Softmax output layers is **miscalibration** (Guo et al., ICML 2017):
     - **Overconfidence:** Softmax pushes probabilities toward 1.0 or 0.0 due to cross-entropy loss minimization, even when the model is evaluating an atypical or ambiguous image.
-    - **High Confidence \(\\neq\) Certainty:** A model predicting 95% confidence on a bruised fruit does not guarantee a 95% likelihood of bacterial presence.
+    - **High Confidence \(\neq\) Certainty:** A model predicting 95% confidence on a bruised fruit does not guarantee a 95% likelihood of bacterial presence.
     - **Mitigation:** In FreshGuard AI, predictions with confidence below 80% trigger advisory banners, and predictions below 50% are flagged as uncertain.
     """)
 

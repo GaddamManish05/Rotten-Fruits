@@ -46,25 +46,25 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 
 with tab1:
     st.markdown("### 🏛️ Taxonomy of Transfer Learning (Pan & Yang, 2010)")
-    st.markdown("""
-    In formal transfer learning terminology, a **Domain** \(\\mathcal{D}\) consists of a feature space \(\\mathcal{X}\) 
-    and a marginal probability distribution \(P(X)\): \(\\mathcal{D} = \\{\\mathcal{X}, P(X)\\}\\).
-    A **Task** \(\\mathcal{T}\) consists of a label space \(\\mathcal{Y}\) and an objective predictive function \(f(\\cdot)\): \(\\mathcal{T} = \\{\\mathcal{Y}, P(Y|X)\\}\\).
+    st.markdown(r"""
+    In formal transfer learning terminology, a **Domain** \(\mathcal{D}\) consists of a feature space \(\mathcal{X}\) 
+    and a marginal probability distribution \(P(X)\): \(\mathcal{D} = \{\mathcal{X}, P(X)\}\).
+    A **Task** \(\mathcal{T}\) consists of a label space \(\mathcal{Y}\) and an objective predictive function \(f(\cdot)\): \(\mathcal{T} = \{\mathcal{Y}, P(Y|X)\}\).
     """)
 
-    st.markdown("""
+    st.markdown(r"""
     | Transfer Learning Type | Source & Target Domains | Source & Target Tasks | Target Label Availability | FreshGuard AI Mapping |
     | :--- | :--- | :--- | :--- | :--- |
-    | **Inductive Transfer Learning** | May be same or different | Different Tasks (\(\\mathcal{T}_S \\neq \\mathcal{T}_T\)) | **Labeled data available** in target domain | **✅ Yes (This Project)** |
-    | **Transductive Transfer Learning** | Different Domains (\(\\mathcal{D}_S \\neq \\mathcal{D}_T\)) | Same Task (\(\\mathcal{T}_S = \\mathcal{T}_T\)) | Unlabeled target data (e.g. Domain Adaptation) | ❌ No |
+    | **Inductive Transfer Learning** | May be same or different | Different Tasks (\(\mathcal{T}_S \neq \mathcal{T}_T\)) | **Labeled data available** in target domain | **✅ Yes (This Project)** |
+    | **Transductive Transfer Learning** | Different Domains (\(\mathcal{D}_S \neq \mathcal{D}_T\)) | Same Task (\(\mathcal{T}_S = \mathcal{T}_T\)) | Unlabeled target data (e.g. Domain Adaptation) | ❌ No |
     | **Unsupervised Transfer Learning** | Different Tasks | Different Tasks | **No labeled data** in either domain (Clustering/DR) | ❌ No |
     """)
 
-    st.markdown("""
+    st.markdown(r"""
     <div class="callout-taxonomy">
         <strong>🎯 Clarification for Viva Defense:</strong> FreshGuard AI is an exact instance of 
-        <strong>Inductive Transfer Learning</strong>. The source task is 1,000-class object categorization on ImageNet (\(\\mathcal{Y}_S\)), 
-        while our target task is 6-class agricultural freshness classification (\(\\mathcal{Y}_T\)). 
+        <strong>Inductive Transfer Learning</strong>. The source task is 1,000-class object categorization on ImageNet (\(\mathcal{Y}_S\)), 
+        while our target task is 6-class agricultural freshness classification (\(\mathcal{Y}_T\)). 
         Target labels are provided during training to adapt the network.
     </div>
     """, unsafe_allow_html=True)
@@ -103,7 +103,7 @@ with tab2:
         """, unsafe_allow_html=True)
 
     with col_m3:
-        st.markdown("""
+        st.markdown(r"""
         <div class="concept-card">
             <h4>3. Fine-Tuning</h4>
             <p><strong>Weights:</strong> Pretrained + partially updated</p>
@@ -115,13 +115,13 @@ with tab2:
 
 with tab3:
     st.markdown("### 🔧 Fine-Tuning Mechanics: Preventing Catastrophic Forgetting")
-    st.markdown("""
+    st.markdown(r"""
     #### Why standard fine-tuning can fail if done incorrectly:
     1. **Catastrophic Forgetting:** If a high learning rate (\(10^{-2}\) or \(10^{-3}\)) is applied to unfrozen pretrained layers, the large gradients propagated from randomly initialized head weights will completely overwrite the delicate pretrained weights in the backbone.
     2. **Batch Normalization Instability:** Unfreezing `BatchNormalization` layers on small batches can ruin the running mean and variance computed over 1.4 million ImageNet images. In FreshGuard AI, we freeze BatchNorm layers or call the base model in inference mode (`training=False`).
     3. **Two-Stage Training Workflow:**
        - **Stage 1:** Train only the newly added top head until convergence while the backbone remains fully frozen.
-       - **Stage 2:** Unfreeze the top convolutional blocks (e.g. layers 100+) and train with a reduced learning rate \(\\eta = 10^{-5}\).
+       - **Stage 2:** Unfreeze the top convolutional blocks (e.g. layers 100+) and train with a reduced learning rate \(\eta = 10^{-5}\).
     """)
 
 with tab4:

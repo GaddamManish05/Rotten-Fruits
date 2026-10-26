@@ -58,3 +58,11 @@ def test_invalid_input_handling():
     """Verifies graceful handling of non-existent image paths."""
     with pytest.raises(Exception):
         predict_fruit("non_existent_file_path_12345.jpg")
+
+
+def test_predict_fruit_with_gradcam(dummy_scratch_model):
+    """Verifies predict_fruit with compute_gradcam=True executes safely without raising."""
+    test_img = Image.new("RGB", (224, 224), color=(100, 150, 200))
+    result = predict_fruit(test_img, model=dummy_scratch_model, model_name_or_key="TestModel", compute_gradcam=True)
+    assert result["success"] is True
+    assert "gradcam_image" in result

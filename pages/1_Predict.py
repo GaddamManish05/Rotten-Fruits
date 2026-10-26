@@ -141,9 +141,10 @@ if pil_image is not None:
     with col_img:
         st.image(pil_image, caption="Input Fruit Image", use_container_width=True)
 
+    result = None
     with col_results:
         if selected_model_name is None:
-            st.warning("Please wait for model training to complete or train a model to run inference.")
+            st.warning("⚠️ No trained models found in `models/`. Please train a model first using `python scripts/run_all_experiments.py` or place `.keras` weights in `models/`.")
         else:
             with st.spinner("Analyzing image features..."):
                 result = predict_fruit(
@@ -187,19 +188,25 @@ if pil_image is not None:
                 st.bar_chart(probs)
 
     # Grad-CAM Section
-    if enable_gradcam and "gradcam_image" in result and result["gradcam_image"] is not None:
-        st.markdown("---")
-        st.markdown("### 3. Visual Explainability (Grad-CAM Attention Map)")
-        st.caption(
-            "Gradient-weighted Class Activation Mapping (Grad-CAM) highlights the convolutional feature map regions "
-            "that contributed most strongly to the predicted classification. Warmer colors (red/yellow) indicate primary decision focus."
-        )
+    if enable_gradcam:
+        if result is not None and result.get("success"):
+            gradcam_img = result.get("gradcam_image")
+            if gradcam_img is not None:
+                st.markdown("---")
+                st.markdown("### 3. Visual Explainability (Grad-CAM Attention Map)")
+                st.caption(
+                    "Gradient-weighted Class Activation Mapping (Grad-CAM) highlights the convolutional feature map regions "
+                    "that contributed most strongly to the predicted classification. Warmer colors (red/yellow) indicate primary decision focus."
+                )
 
-        col_cam1, col_cam2 = st.columns(2)
-        with col_cam1:
-            st.image(pil_image, caption="Original Input Image", use_container_width=True)
-        with col_cam2:
-            st.image(result["gradcam_image"], caption=f"Grad-CAM Heatmap ({result['model_used']})", use_container_width=True)
+                col_cam1, col_cam2 = st.columns(2)
+                with col_cam1:
+                    st.image(pil_image, caption="Original Input Image", use_container_width=True)
+                with col_cam2:
+                    st.image(gradcam_img, caption=f"Grad-CAM Heatmap ({result['model_used']})", use_container_width=True)
+            else:
+                st.markdown("---")
+                st.info("ℹ️ Grad-CAM attention heatmap could not be generated for this model layer, but the primary classification completed successfully.")
 
     # Food Safety Disclaimer
     st.markdown("---")

@@ -39,7 +39,7 @@ def generate_gradcam_heatmap(
         # Determine the base feature extractor sub-model or top conv layer
         mobilenet_submodel = None
         for layer in model.layers:
-            if isinstance(layer, tf.keras.Model) or "mobilenetv2" in layer.name.lower():
+            if isinstance(layer, tf.keras.Model):
                 mobilenet_submodel = layer
                 break
 
@@ -55,7 +55,7 @@ def generate_gradcam_heatmap(
             # Build sub-model to output conv activations
             conv_layer = mobilenet_submodel.get_layer(last_conv_name)
             sub_grad_model = tf.keras.models.Model(
-                inputs=mobilenet_submodel.inputs,
+                inputs=mobilenet_submodel.input,
                 outputs=[conv_layer.output, mobilenet_submodel.output]
             )
 
@@ -64,10 +64,10 @@ def generate_gradcam_heatmap(
             remaining_layers = model.layers[submodel_idx + 1:]
 
             # Forward pass to submodel
-            # First apply preprocessing layers before submodel
-            x = img_array
+            x = tf.cast(img_array, tf.float32)
             for l in model.layers[:submodel_idx]:
-                x = l(x)
+                if not isinstance(l, tf.keras.layers.InputLayer) and not type(l).__name__.startswith("Input"):
+                    x = l(x)
 
             with tf.GradientTape() as tape:
                 conv_outputs, sub_out = sub_grad_model(x)
@@ -75,7 +75,8 @@ def generate_gradcam_heatmap(
                 # Pass through remaining head layers
                 head_out = sub_out
                 for l in remaining_layers:
-                    head_out = l(head_out)
+                    if not isinstance(l, tf.keras.layers.InputLayer) and not type(l).__name__.startswith("Input"):
+                        head_out = l(head_out)
                 if pred_index is None:
                     pred_index = tf.argmax(head_out[0])
                 class_channel = head_out[:, pred_index]
@@ -92,7 +93,7 @@ def generate_gradcam_heatmap(
 
             last_conv_layer = model.get_layer(last_conv_name)
             grad_model = tf.keras.models.Model(
-                inputs=model.inputs,
+                inputs=model.input,
                 outputs=[last_conv_layer.output, model.output]
             )
 
@@ -120,6 +121,8 @@ def generate_gradcam_heatmap(
         return heatmap.numpy()
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         print(f"Grad-CAM computation note: {e}")
         return None
 
@@ -135,7 +138,11 @@ def overlay_heatmap_on_image(
     """
     # Resize heatmap to match image dimensions
     heatmap_uint8 = np.uint8(255 * heatmap)
-    jet = cm.get_cmap(colormap)
+    try:
+        import matplotlib
+        jet = matplotlib.colormaps[colormap]
+    except Exception:
+        jet = cm.get_cmap(colormap)
     jet_colors = jet(np.arange(256))[:, :3]
     jet_heatmap = jet_colors[heatmap_uint8]
 

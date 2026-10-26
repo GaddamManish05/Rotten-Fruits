@@ -40,6 +40,28 @@ def get_available_models() -> Dict[str, Path]:
     return available
 
 
+# Streamlit resource cache decorator if available, else identity pass-through
+try:
+    import streamlit as st
+    _cache_decorator = st.cache_resource
+except Exception:
+    def _cache_decorator(f):
+        return f
+
+
+@_cache_decorator
+def _load_keras_model(file_path_str: str) -> Optional[tf.keras.Model]:
+    """Loads a Keras model from disk with required custom objects."""
+    try:
+        custom_objects = {
+            "preprocess_input": tf.keras.applications.mobilenet_v2.preprocess_input,
+        }
+        return tf.keras.models.load_model(file_path_str, custom_objects=custom_objects)
+    except Exception as e:
+        print(f"Error loading model from {file_path_str}: {e}")
+        return None
+
+
 def load_model_by_key(model_key: str) -> Optional[tf.keras.Model]:
     """Loads and caches model by user selection key or file path."""
     global _LOADED_MODELS
@@ -60,16 +82,10 @@ def load_model_by_key(model_key: str) -> Optional[tf.keras.Model]:
     if target_path is None or not target_path.exists():
         return None
 
-    try:
-        custom_objects = {
-            "preprocess_input": tf.keras.applications.mobilenet_v2.preprocess_input,
-        }
-        model = tf.keras.models.load_model(str(target_path), custom_objects=custom_objects)
+    model = _load_keras_model(str(target_path))
+    if model is not None:
         _LOADED_MODELS[model_key] = model
-        return model
-    except Exception as e:
-        print(f"Error loading model from {target_path}: {e}")
-        return None
+    return model
 
 
 def predict_fruit(

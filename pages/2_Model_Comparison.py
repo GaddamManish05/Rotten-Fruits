@@ -150,7 +150,7 @@ else:
 
         # Academic Discussion
         st.markdown("---")
-        st.markdown("""
+        st.markdown(r"""
         <div class="academic-note">
             <h4 style="margin-top:0;">🎓 Deep Learning Researcher Discussion</h4>
             <ul>
